@@ -39,5 +39,10 @@ public class ServiceResponse {
 	public void setError(boolean isError) {
 		this.isError = isError;
 	}
+	
+	@Override
+	public String toString() {
+		return response + " " + status;
+	}
 
 }

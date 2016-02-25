@@ -9,14 +9,24 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import com.scoreServer.server.Constants;
 import com.scoreServer.server.bean.ServiceResponse;
+import com.scoreServer.server.bean.UserScore;
 import com.scoreServer.server.datastructure.LevelUserScoreHistory;
 import com.scoreServer.server.util.SessionUtil;
+import com.scoreServer.service.framework.Context;
+import com.scoreServer.service.service.HighscoreFormatterService;
 import com.scoreServer.service.service.HighscoreService;
 
 public class HighscoreServiceImpl implements HighscoreService {
+	
+	private HighscoreFormatterService highscoreFormatterService;
+	
+	public HighscoreServiceImpl() {
+		highscoreFormatterService = Context.get(HighscoreFormatterService.class);
+	}
 
 	@Override
 	public ServiceResponse getHighscoreForLevel(String levelIdString) {
@@ -45,33 +55,16 @@ public class HighscoreServiceImpl implements HighscoreService {
 				return new ServiceResponse("Invalid level!", 400);
 			}
 			
-			String highscoreList = levelHistory.getHighScoreList();
-	
-			String filename;
+			List<UserScore> highscores = levelHistory.getHighscores();
+			String highscoreList = highscoreFormatterService.format(highscores);
 			
-			try {
-				filename = writeToFile(highscoreList);
-			} catch (IOException e) {
-				return new ServiceResponse("Error while exporting to csv!", 500);
-			}
-			
-			response = new ServiceResponse(filename);
+			response = new ServiceResponse(highscoreList);
 		
 		} finally {
 			Constants.GAME_HISTORY_LOCK.readLock().unlock();
 		}
 		
 		return response;
-	}
-
-	private String writeToFile(String highscoreList) throws IOException {
-		String fileName = SessionUtil.getSessionId() + ".csv";
-		
-		List<String> lines = Arrays.asList(highscoreList);
-		Path file = Paths.get("the-file-name.txt");
-		Files.write(file, lines, Charset.forName("UTF-8"));
-		return fileName;
-		
 	}
 
 }

@@ -22,9 +22,6 @@ public class RequestHandler implements HttpHandler {
 	@SuppressWarnings("unchecked")
 	public void handle(HttpExchange exchange) {
 
-		String response = null;
-		int statusCode = 200;
-
 		ServiceResponse serviceResponse = null;
 
 		try {
@@ -44,26 +41,23 @@ public class RequestHandler implements HttpHandler {
 			} else if (params.get("request").equals("score")) {
 
 				// A new store has been received to be stored
-				System.out.println("New request received to save the score" + (String) params.get("score"));
+				System.out.println("New request received to save the score" + (String) params.get(Constants.POST_BODY_PARAMETER_NAME));
 
 				int userId = -1;
 
 				ScoreService scoreService = Context.get(ScoreService.class);
 
 				serviceResponse = scoreService.addScore((String) params.get("sessionkey"),
-						(String) params.get("levelid"), (String) params.get("score"));
+						(String) params.get("levelid"), (String) params.get(Constants.POST_BODY_PARAMETER_NAME));
 
 			} else if (params.get("request").equals("highscorelist")) {
 
 				// A list of the best scores has been requested
 				System.out.println("Received a new request for the highest scores" + "the level "
 						+ (String) params.get("levelid"));
-
-				// get highscore per level
-				response = null;
-
+				
 				HighscoreService highscoreService = Context.get(HighscoreService.class);
-				String fileName = highscoreService.getHighscoreForLevel((String) params.get("levelid")).getResponse();
+				serviceResponse = highscoreService.getHighscoreForLevel((String) params.get("levelid"));
 
 				/*
 				 * ScoreSingleton.getInstance().getHighestScores(
@@ -72,12 +66,11 @@ public class RequestHandler implements HttpHandler {
 
 				// This is a header to permit the download of the csv
 				Headers headers = exchange.getResponseHeaders();
-				headers.add("Content-Type", "text/csv");
-				headers.add("Content-Disposition", "attachment;filename=" + fileName);
+				headers.add("Content-Type", "application/octet-stream");
+				headers.add("Content-Disposition", "attachment;filename=" + "highscores.csv");
 			} else {
-				response = "Not Available!";
-				System.out.println(response);
-				statusCode = 400; // Request type not implemented
+				serviceResponse = new ServiceResponse("Not Available!", 400);
+				System.out.println(serviceResponse);
 			}
 		} catch (NumberFormatException exception) {
 			serviceResponse.setStatus(400);
@@ -93,19 +86,21 @@ public class RequestHandler implements HttpHandler {
 
 		try {
 			if (serviceResponse != null) {
+				Headers headers = exchange.getResponseHeaders();
+				headers.add("Content-Type", "text/plain");
 				exchange.sendResponseHeaders(serviceResponse.getStatus(), serviceResponse.getResponse().length());
 			} else {
-				exchange.sendResponseHeaders(statusCode, 0);
+				exchange.sendResponseHeaders(400, 0);
 			}
 		} catch (IOException e) {
 			serviceResponse.setResponse(e.getMessage().toString());
-			System.out.println(response);
+			System.out.println(serviceResponse);
 		}
 
 		// Send the body response
 		OutputStream os = exchange.getResponseBody();
 		try {
-			os.write(response.toString().getBytes());
+			os.write(serviceResponse.getResponse().getBytes());
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

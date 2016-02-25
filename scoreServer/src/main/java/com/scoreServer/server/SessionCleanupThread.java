@@ -6,7 +6,7 @@ import com.scoreServer.service.service.SessionCleanupService;
 public class SessionCleanupThread extends Thread {
 	
 	private SessionCleanupService cleanupService;
-
+	
 	@Override
 	public void run() {
 		

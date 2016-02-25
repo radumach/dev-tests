@@ -1,11 +1,12 @@
 package com.scoreServer.server.datastructure;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Optional;
-import java.util.TreeSet;
 
 import com.scoreServer.server.Constants;
 import com.scoreServer.server.bean.UserScore;
@@ -13,63 +14,66 @@ import com.scoreServer.server.bean.UserScore;
 public class LevelUserScoreHistory {
 
 	private final Map<Integer, Integer> scoresHistory;
-	private final TreeSet<UserScore> highscores;
+	private final List<UserScore> highscores;
+	private Comparator<UserScore> highscoreComparator;
 
 	private int minHighScore = Integer.MIN_VALUE;
+	
+	private static final String CSV_DELIMITER = ",";
 
 	public LevelUserScoreHistory() {
 		scoresHistory = new HashMap<>();
-		highscores = new TreeSet<>((o1, o2) -> o2.getScore() - o1.getScore());
+		highscores = new ArrayList<>(Constants.MAX_HIGHSCORE_COUNT);
+		highscoreComparator = (us1, us2) -> us2.getScore() - us1.getScore();
 	}
 
 	public void update(UserScore newUserScore) {
-		boolean isHighscore = newUserScore.getScore() > minHighScore;
-		if (isHighscore) {
-			minHighScore = newUserScore.getScore();
-		}
-		if (scoresHistory.put(newUserScore.getUserId(), newUserScore.getScore()) != null) {
-			// user was already in history
-			if (isHighscore || highscores.size() <= Constants.MAX_HIGHSCORE_COUNT) {
-				removeOldHighscore(newUserScore);
-				highscores.add(newUserScore);
-				if (highscores.size() > Constants.MAX_HIGHSCORE_COUNT) {
-					removeLastHighscore();
+		scoresHistory.put(newUserScore.getUserId(), newUserScore.getScore());
+		updateHighscores(newUserScore);
+	}
+
+	public List<UserScore> getHighscores() {
+		//TODO: maybe: ?
+		//return Collections.unmodifiableList(highscores);
+		return highscores;
+	}
+	
+	private void updateHighscores(UserScore newUserScore) {
+		if(newUserScore.getScore() > minHighScore) {
+			Optional<UserScore> oldHighscore = getOldHighscore(newUserScore);
+			if(oldHighscore.isPresent()) {
+				UserScore oldHighscoreEntry = oldHighscore.get();
+				if(oldHighscoreEntry.getScore() < newUserScore.getScore()) {
+					oldHighscoreEntry.setScore(newUserScore.getScore());
+					sortHighscores();
+					updateMinHighscore();
 				}
-
-			}
-		} else {
-			// user wasn't in history
-			if (isHighscore || highscores.size() <= Constants.MAX_HIGHSCORE_COUNT) {
+			} else {
 				highscores.add(newUserScore);
-				if (highscores.size() > Constants.MAX_HIGHSCORE_COUNT) {
-					removeLastHighscore();
-				}
+				sortHighscores();
+				trimHighscores();
+				updateMinHighscore();
 			}
 		}
 	}
-
-	public String getHighScoreList() {
-		Iterator<UserScore> iterator = highscores.iterator();
-		StringBuilder sb = new StringBuilder(iterator.next().toString());
-		for (; iterator.hasNext();) {
-			sb.append(", ");
-			sb.append(iterator.next().toString());
-		}
-		return sb.toString();
-	}
-
-	private void removeLastHighscore() {
-		if (highscores.size() > Constants.MAX_HIGHSCORE_COUNT) {
-			highscores.remove(highscores.last());
+	
+	private void trimHighscores() {
+		if(highscores.size() > Constants.MAX_HIGHSCORE_COUNT) {
+			highscores.remove(highscores.size() - 1);
 		}
 	}
-
-	private void removeOldHighscore(UserScore newUserScore) {
-		NavigableSet<UserScore> matchingHighScores = highscores.subSet(newUserScore, true, newUserScore, true);
-		Optional<UserScore> potentialOldHighscoreForUser = matchingHighScores.stream()
-				.filter(userScore -> userScore.getUserId().equals(newUserScore.getUserId())).findFirst();
-		if (potentialOldHighscoreForUser.isPresent()) {
-			highscores.remove(potentialOldHighscoreForUser.get());
+	
+	private void updateMinHighscore() {
+		if(highscores.size() >= Constants.MAX_HIGHSCORE_COUNT) {
+			minHighScore = highscores.get(highscores.size() - 1).getScore();
 		}
+	}
+	
+	private void sortHighscores() {
+		Collections.sort(highscores, highscoreComparator);
+	}
+	
+	private Optional<UserScore> getOldHighscore(UserScore newUserScore) {
+		return highscores.stream().filter(us -> us.getUserId().equals(newUserScore.getUserId())).findFirst();
 	}
 }

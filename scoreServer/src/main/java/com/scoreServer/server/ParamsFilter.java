@@ -12,10 +12,10 @@ import com.scoreServer.server.util.HttpRequestUtil;
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
 
-public class PramsFilter extends Filter {
+public class ParamsFilter extends Filter {
 	HttpRequestUtil utils;
 
-	public PramsFilter() {
+	public ParamsFilter() {
 		utils = new HttpRequestUtil();
 	}
 
@@ -27,14 +27,9 @@ public class PramsFilter extends Filter {
 	 */
 	@Override
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
-		switch (exchange.getRequestMethod().toLowerCase()) {
-		case "post":
-			parsePostParameters(exchange);
-		case "get":
-			parseGetParameters(exchange);
-		default:
-			parseUrlEncodedParameters(exchange);
-		}
+		parseGetParameters(exchange);
+		parsePostParameters(exchange);
+		parseUrlEncodedParameters(exchange);
 
 		chain.doFilter(exchange);
 	}
@@ -70,8 +65,8 @@ public class PramsFilter extends Filter {
 			}
 			InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), "utf-8");
 			BufferedReader br = new BufferedReader(isr);
-			String query = br.readLine();
-			utils.parseQuery(query, parameters);
+			String postBody = br.readLine();
+			parameters.put(Constants.POST_BODY_PARAMETER_NAME, postBody);
 		}
 	}
 

@@ -18,10 +18,6 @@ public class LoginServiceImpl implements LoginService {
 		String sessionId = SessionUtil.getSessionId();
 
 		Session session = new Session(sessionId);
-
-		if (!SESSION_STORE.keySet().contains(sessionId)) {
-			return login(userIdString);
-		}
 		
 		SESSION_STORE.put(sessionId, session);
 

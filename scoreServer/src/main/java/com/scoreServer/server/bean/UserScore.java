@@ -30,5 +30,4 @@ public class UserScore {
 		this.score = score;
 	}
 	
-	
 }
