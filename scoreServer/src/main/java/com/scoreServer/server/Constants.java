@@ -2,6 +2,7 @@ package com.scoreServer.server;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.scoreServer.server.bean.Session;
 import com.scoreServer.server.datastructure.LevelUserScoreHistory;
@@ -17,5 +18,7 @@ public class Constants {
 	public static Integer MAX_HIGHSCORE_COUNT;
 
 	public static Long SESSION_EXPIRATION_TIME;
+	
+	public static final ReentrantReadWriteLock GAME_HISTORY_LOCK = new ReentrantReadWriteLock();
 
 }
