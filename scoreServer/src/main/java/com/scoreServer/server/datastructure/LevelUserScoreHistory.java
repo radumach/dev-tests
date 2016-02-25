@@ -1,31 +1,28 @@
 package com.scoreServer.server.datastructure;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Optional;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.scoreServer.server.Constants;
 import com.scoreServer.server.bean.UserScore;
 
 public class LevelUserScoreHistory {
 
-	private final ConcurrentHashMap<Integer, Integer> scoresHistory;
+	private final Map<Integer, Integer> scoresHistory;
 	private final TreeSet<UserScore> highscores;
 
 	private int minHighScore = Integer.MIN_VALUE;
 
-	final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-
 	public LevelUserScoreHistory() {
-		scoresHistory = new ConcurrentHashMap<>();
+		scoresHistory = new HashMap<>();
 		highscores = new TreeSet<>((o1, o2) -> o2.getScore() - o1.getScore());
 	}
 
 	public void update(UserScore newUserScore) {
-		lock.writeLock().lock();
 		boolean isHighscore = newUserScore.getScore() > minHighScore;
 		if (isHighscore) {
 			minHighScore = newUserScore.getScore();
@@ -49,18 +46,15 @@ public class LevelUserScoreHistory {
 				}
 			}
 		}
-		lock.writeLock().unlock();
 	}
 
 	public String getHighScoreList() {
-		lock.readLock().lock();
 		Iterator<UserScore> iterator = highscores.iterator();
 		StringBuilder sb = new StringBuilder(iterator.next().toString());
 		for (; iterator.hasNext();) {
 			sb.append(", ");
 			sb.append(iterator.next().toString());
 		}
-		lock.readLock().unlock();
 		return sb.toString();
 	}
 

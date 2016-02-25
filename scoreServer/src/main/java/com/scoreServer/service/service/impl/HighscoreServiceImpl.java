@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
+import com.scoreServer.server.Constants;
 import com.scoreServer.server.bean.ServiceResponse;
 import com.scoreServer.server.datastructure.LevelUserScoreHistory;
 import com.scoreServer.server.util.SessionUtil;
@@ -34,23 +35,31 @@ public class HighscoreServiceImpl implements HighscoreService {
 			return new ServiceResponse("Invalid level!", 400);
 		}
 		
-		LevelUserScoreHistory levelHistory = GAME_DATA.get(levelId);
-
-		if (levelHistory == null) {
-			return new ServiceResponse("Invalid level!", 400);
-		}
-		
-		String highscoreList = levelHistory.getHighScoreList();
-
-		String filename;
+		Constants.GAME_HISTORY_LOCK.readLock().lock();
 		
 		try {
-			filename = writeToFile(highscoreList);
-		} catch (IOException e) {
-			return new ServiceResponse("Error while exporting to csv!", 500);
-		}
 		
-		response = new ServiceResponse(filename);
+			LevelUserScoreHistory levelHistory = GAME_DATA.get(levelId);
+	
+			if (levelHistory == null) {
+				return new ServiceResponse("Invalid level!", 400);
+			}
+			
+			String highscoreList = levelHistory.getHighScoreList();
+	
+			String filename;
+			
+			try {
+				filename = writeToFile(highscoreList);
+			} catch (IOException e) {
+				return new ServiceResponse("Error while exporting to csv!", 500);
+			}
+			
+			response = new ServiceResponse(filename);
+		
+		} finally {
+			Constants.GAME_HISTORY_LOCK.readLock().unlock();
+		}
 		
 		return response;
 	}
