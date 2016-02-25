@@ -1,4 +1,4 @@
-package com.scoreServer.server.datastructure;
+package com.scoreServer.server.bean;
 
 public class UserScore {
 	

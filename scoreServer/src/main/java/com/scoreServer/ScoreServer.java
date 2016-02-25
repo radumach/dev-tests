@@ -1,12 +1,12 @@
 package com.scoreServer;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
+import com.scoreServer.server.Constants;
 import com.scoreServer.server.PramsFilter;
 import com.scoreServer.server.RequestHandler;
-import com.scoreServer.server.datastructure.LevelUserScoreHistory;
+import com.scoreServer.server.SessionCleanupThread;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 
@@ -16,13 +16,16 @@ import com.sun.net.httpserver.HttpServer;
  */
 public class ScoreServer {
 
-	public static final ConcurrentHashMap<Integer, String> SESSION_STORE = new ConcurrentHashMap<Integer, String>();
-
-	public static final ConcurrentHashMap<Integer, LevelUserScoreHistory> GAME_DATA = new ConcurrentHashMap<Integer, LevelUserScoreHistory>();
-
-	public static final int MAX_HIGHSCORE_COUNT = 15;
-
 	public static void main(String[] args) throws Exception {
+
+		if (args.length < 2) {
+			Constants.MAX_HIGHSCORE_COUNT = 15;
+			Constants.SESSION_EXPIRATION_TIME = 10 * 60000l; // 10 minutes
+		} else {
+			Constants.MAX_HIGHSCORE_COUNT = Integer.parseInt(args[0]);
+			Constants.SESSION_EXPIRATION_TIME = 60000l * Long.parseLong(args[1]);
+		}
+
 		// Create an http server
 		HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
 
@@ -37,8 +40,12 @@ public class ScoreServer {
 
 		// Start the server
 		server.start();
-
 		System.out.println("The server is started!");
+		
+		Thread sessionCleanupThread = new SessionCleanupThread();
+		sessionCleanupThread.start();
+		System.out.println("Session cleanup thread is started!");
+		
 	}
 
 }

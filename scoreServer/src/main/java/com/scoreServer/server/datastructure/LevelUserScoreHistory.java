@@ -7,7 +7,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.scoreServer.ScoreServer;
+import com.scoreServer.server.Constants;
+import com.scoreServer.server.bean.UserScore;
 
 public class LevelUserScoreHistory {
 
@@ -31,19 +32,19 @@ public class LevelUserScoreHistory {
 		}
 		if (scoresHistory.put(newUserScore.getUserId(), newUserScore.getScore()) != null) {
 			// user was already in history
-			if (isHighscore || highscores.size() <= ScoreServer.MAX_HIGHSCORE_COUNT) {
+			if (isHighscore || highscores.size() <= Constants.MAX_HIGHSCORE_COUNT) {
 				removeOldHighscore(newUserScore);
 				highscores.add(newUserScore);
-				if (highscores.size() > ScoreServer.MAX_HIGHSCORE_COUNT) {
+				if (highscores.size() > Constants.MAX_HIGHSCORE_COUNT) {
 					removeLastHighscore();
 				}
 
 			}
 		} else {
 			// user wasn't in history
-			if (isHighscore || highscores.size() <= ScoreServer.MAX_HIGHSCORE_COUNT) {
+			if (isHighscore || highscores.size() <= Constants.MAX_HIGHSCORE_COUNT) {
 				highscores.add(newUserScore);
-				if (highscores.size() > ScoreServer.MAX_HIGHSCORE_COUNT) {
+				if (highscores.size() > Constants.MAX_HIGHSCORE_COUNT) {
 					removeLastHighscore();
 				}
 			}
@@ -64,7 +65,7 @@ public class LevelUserScoreHistory {
 	}
 
 	private void removeLastHighscore() {
-		if (highscores.size() > ScoreServer.MAX_HIGHSCORE_COUNT) {
+		if (highscores.size() > Constants.MAX_HIGHSCORE_COUNT) {
 			highscores.remove(highscores.last());
 		}
 	}

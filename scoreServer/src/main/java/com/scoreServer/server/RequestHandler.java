@@ -3,6 +3,12 @@ package com.scoreServer.server;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+
+import com.scoreServer.server.bean.ServiceResponse;
+import com.scoreServer.service.framework.Context;
+import com.scoreServer.service.service.HighscoreService;
+import com.scoreServer.service.service.LoginService;
+import com.scoreServer.service.service.ScoreService;
 import com.sun.net.httpserver.*;
 
 public class RequestHandler implements HttpHandler {
@@ -18,46 +24,35 @@ public class RequestHandler implements HttpHandler {
 
 		String response = null;
 		int statusCode = 200;
-		
-		
-		//handle "get" requests
-				
-		//handle "post" requests
-		
+
+		ServiceResponse serviceResponse = null;
 
 		try {
 			Map<String, Object> params = (Map<String, Object>) exchange.getAttribute("parameters");
 
 			if (params.get("request").equals("login")) {
 
-				// The user is logging-in, asking for a session key
-				System.out.println("New login request received for the user" + (String) params.get("userid"));
-				// GetSession for user
-				// response = SessionSingleton.getInstance().getSessionKey(
-				// Integer.parseInt((String)params.get("userid")));
+				String userId = (String) params.get("userid");
 
-				if (response == null)
-					statusCode = 500; // Server error
+				// The user is logging-in, asking for a session key
+				// GetSession for user
+
+				LoginService loginService = Context.get(LoginService.class);
+
+				serviceResponse = loginService.login(userId);
+
 			} else if (params.get("request").equals("score")) {
 
 				// A new store has been received to be stored
 				System.out.println("New request received to save the score" + (String) params.get("score"));
 
 				int userId = -1;
-				// int userId =
-				// SessionSingleton.getInstance().validateSessionKey(
-				// (String)params.get("sessionkey"));
 
-				if (userId == -1) {
-					statusCode = 401; // Unhautorized user
-				} else if (true) {
-					/*
-					 * ScoreSingleton.getInstance().insertScore( userId,
-					 * Integer.parseInt((String)params.get("levelid")),
-					 * Integer.parseInt((String)params.get("score"))) == -1
-					 */
-					statusCode = 500; // Server error
-				}
+				ScoreService scoreService = Context.get(ScoreService.class);
+
+				serviceResponse = scoreService.addScore((String) params.get("sessionkey"),
+						(String) params.get("levelid"), (String) params.get("score"));
+
 			} else if (params.get("request").equals("highscorelist")) {
 
 				// A list of the best scores has been requested
@@ -66,41 +61,44 @@ public class RequestHandler implements HttpHandler {
 
 				// get highscore per level
 				response = null;
+
+				HighscoreService highscoreService = Context.get(HighscoreService.class);
+				String fileName = highscoreService.getHighscoreForLevel((String) params.get("levelid")).getResponse();
+
 				/*
 				 * ScoreSingleton.getInstance().getHighestScores(
 				 * Integer.parseInt((String)params.get("levelid")));
 				 */
 
 				// This is a header to permit the download of the csv
-				// Headers headers = exchange.getResponseHeaders();
-				// headers.add("Content-Type", "text/csv");
-				// headers.add("Content-Disposition",
-				// "attachment;filename=myfilename.csv");
+				Headers headers = exchange.getResponseHeaders();
+				headers.add("Content-Type", "text/csv");
+				headers.add("Content-Disposition", "attachment;filename=" + fileName);
 			} else {
 				response = "Not Available!";
 				System.out.println(response);
 				statusCode = 400; // Request type not implemented
 			}
 		} catch (NumberFormatException exception) {
-			statusCode = 400;
-			response = "Wrong number format";
-			System.out.println(response);
+			serviceResponse.setStatus(400);
+			serviceResponse.setResponse("Wrong number format");
+			System.out.println(serviceResponse.getResponse());
 		} catch (Exception exception) {
-			statusCode = 400;
-			response = exception.getMessage().toString();
-			System.out.println(response);
+			serviceResponse.setStatus(400);
+			serviceResponse.setResponse("Wrong number format");
+			System.out.println(serviceResponse.getResponse());
 		}
 
 		// Send the header response
 
 		try {
-			if (response != null) {
-				exchange.sendResponseHeaders(statusCode, response.length());
+			if (serviceResponse != null) {
+				exchange.sendResponseHeaders(serviceResponse.getStatus(), serviceResponse.getResponse().length());
 			} else {
 				exchange.sendResponseHeaders(statusCode, 0);
 			}
 		} catch (IOException e) {
-			response = e.getMessage().toString();
+			serviceResponse.setResponse(e.getMessage().toString());
 			System.out.println(response);
 		}
 
