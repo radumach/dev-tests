@@ -38,5 +38,13 @@ public class Context {
 			services.put(interfaceClass, providor);
 		}
 	}
+	
+	/**
+	 * Clear all implementations mappings. Typically only called in unit
+	 * tests.
+	 */
+	public static <T> void clear() {
+		services.clear();
+	}
 
 }

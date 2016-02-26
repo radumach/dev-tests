@@ -2,20 +2,12 @@ package com.scoreServer.service.service.impl;
 
 import static com.scoreServer.server.Constants.GAME_DATA;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import com.scoreServer.server.Constants;
 import com.scoreServer.server.bean.ServiceResponse;
 import com.scoreServer.server.bean.UserScore;
 import com.scoreServer.server.datastructure.LevelUserScoreHistory;
-import com.scoreServer.server.util.SessionUtil;
 import com.scoreServer.service.framework.Context;
 import com.scoreServer.service.service.HighscoreFormatterService;
 import com.scoreServer.service.service.HighscoreService;
