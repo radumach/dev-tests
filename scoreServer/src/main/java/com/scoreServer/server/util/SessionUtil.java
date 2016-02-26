@@ -3,9 +3,8 @@ package com.scoreServer.server.util;
 import java.util.Random;
 
 public class SessionUtil {
-
+	
 	public static String getSessionId() {
-		
 		char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 		StringBuilder sb = new StringBuilder();
 		Random random = new Random();

@@ -1,5 +1,6 @@
 package com.scoreServer.server.testUtils;
 
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.scoreServer.server.Constants;
@@ -8,7 +9,7 @@ import com.scoreServer.server.datastructure.LevelUserScoreHistory;
 
 public class GameDataMockHelper {
 	
-	public static void clear() {
+	public static void clearAll() {
 		Constants.GAME_DATA.clear();
 	}
 
@@ -44,5 +45,19 @@ public class GameDataMockHelper {
 		for(UserScore us:userScores) {
 			levelUserScoreHistory.update(us);
 		}
+	}
+	
+	public static Integer getScore(String sessionId, int levelId) {
+		LevelUserScoreHistory levelUserScoreHistory = Constants.GAME_DATA.get(levelId);
+		if(levelUserScoreHistory == null) {
+			return null;
+		}
+		Integer userId = Constants.SESSION_MAP.get(sessionId);
+		Optional<UserScore> o = levelUserScoreHistory.getHighscores().stream().filter(us -> us.getUserId().equals(userId)).findFirst();
+		if(o.isPresent()) {
+			return o.get().getScore();
+		} 
+		
+		return null;
 	}
 }

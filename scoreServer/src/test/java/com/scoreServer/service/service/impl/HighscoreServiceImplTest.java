@@ -1,9 +1,9 @@
 package com.scoreServer.service.service.impl;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 
@@ -19,8 +19,6 @@ import com.scoreServer.server.testUtils.GameDataMockHelper;
 import com.scoreServer.server.testUtils.ServiceLocatorMockHelper;
 import com.scoreServer.service.service.HighscoreFormatterService;
 
-import junit.framework.AssertionFailedError;
-
 public class HighscoreServiceImplTest {
 	
 	private HighscoreServiceImpl highscoreService;
@@ -29,13 +27,12 @@ public class HighscoreServiceImplTest {
 	
 	@Captor
 	private ArgumentCaptor<Collection<UserScore>> collectionUserScoreArgumentCaptor;
-	
-	
+		
 	@Before
 	public void init() {
 		MockitoAnnotations.initMocks(this);
+		ServiceLocatorMockHelper.clearRegistredInstances();
 		highscoreFormatterServiceMock = ServiceLocatorMockHelper.mockAndRegister(HighscoreFormatterService.class);
-		//when(highscoreFormatterServiceMock.format(any())).thenReturn("1,15\n2,14\n");
 		highscoreService = new HighscoreServiceImpl();
 	}
 
@@ -68,6 +65,8 @@ public class HighscoreServiceImplTest {
 	
 	@Test
 	public void testUnsuccesfullHighscoreForLevel() {
-		//TODO
+		ServiceResponse highscoreResponse = highscoreService.getHighscoreForLevel("abc");
+		assertEquals(422, highscoreResponse.getStatus());
+		assertTrue(highscoreResponse.isError());
 	}
 }

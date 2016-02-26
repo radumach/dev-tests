@@ -5,6 +5,7 @@ import static com.scoreServer.server.Constants.GAME_DATA;
 import java.util.List;
 
 import com.scoreServer.server.Constants;
+import com.scoreServer.server.Constants.HttpStatus;
 import com.scoreServer.server.bean.ServiceResponse;
 import com.scoreServer.server.bean.UserScore;
 import com.scoreServer.server.datastructure.LevelUserScoreHistory;
@@ -30,11 +31,11 @@ public class HighscoreServiceImpl implements HighscoreService {
 		try {
 			levelId = Integer.parseUnsignedInt(levelIdString);
 		} catch (NumberFormatException e) {
-			response = new ServiceResponse(e.getMessage(), 500);
+			response = new ServiceResponse(HttpStatus.UNPROCESSABLE_ENTITY_422.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY_422);
 		}
 
 		if (levelId == null) {
-			return new ServiceResponse("Invalid level!", 400);
+			return new ServiceResponse(HttpStatus.UNPROCESSABLE_ENTITY_422.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY_422);
 		}
 		
 		Constants.GAME_HISTORY_LOCK.readLock().lock();
@@ -44,7 +45,7 @@ public class HighscoreServiceImpl implements HighscoreService {
 			LevelUserScoreHistory levelHistory = GAME_DATA.get(levelId);
 	
 			if (levelHistory == null) {
-				return new ServiceResponse("Invalid level!", 400);
+				return new ServiceResponse(HttpStatus.NOT_AVAILABLE_404.getMessage(), HttpStatus.NOT_AVAILABLE_404);
 			}
 			
 			List<UserScore> highscores = levelHistory.getHighscores();

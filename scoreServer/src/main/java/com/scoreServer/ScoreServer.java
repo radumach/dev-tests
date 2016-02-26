@@ -6,6 +6,7 @@ import java.util.concurrent.Executors;
 import com.scoreServer.server.Constants;
 import com.scoreServer.server.ParamsFilter;
 import com.scoreServer.server.RequestHandler;
+import com.scoreServer.server.SessionCleanupThread;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
 
@@ -14,8 +15,10 @@ import com.sun.net.httpserver.HttpServer;
  *
  */
 public class ScoreServer {
+	
+	private static HttpServer server;
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String... args) throws Exception {
 
 		if (args.length >= 2) {
 			Constants.MAX_HIGHSCORE_COUNT = Integer.parseInt(args[0]);
@@ -23,7 +26,7 @@ public class ScoreServer {
 		}
 
 		// Create an http server
-		HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+		server = HttpServer.create(new InetSocketAddress("localhost", Constants.SERVER_PORT), 0);
 
 		// Create a context
 		HttpContext context = server.createContext("/", new RequestHandler());
@@ -36,13 +39,17 @@ public class ScoreServer {
 
 		// Start the server
 		server.start();
-		System.out.println("The server is started!");
+		System.out.println("Server is started: " + server.getAddress());
 		
-//		Thread sessionCleanupThread = new SessionCleanupThread();
-//		sessionCleanupThread.setDaemon(true);
-//		sessionCleanupThread.start();
-//		System.out.println("Session cleanup thread is started!");
+		Thread sessionCleanupThread = new SessionCleanupThread();
+		sessionCleanupThread.setDaemon(true);
+		sessionCleanupThread.start();
+		System.out.println("Session cleanup thread is started!");
 		
+	}
+	
+	public static void stop() {
+		server.stop(0);
 	}
 
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
+import com.scoreServer.server.Constants.HttpStatus;
 import com.scoreServer.server.bean.ServiceResponse;
 import com.scoreServer.service.framework.Context;
 import com.scoreServer.service.service.HighscoreService;
@@ -69,16 +70,16 @@ public class RequestHandler implements HttpHandler {
 				headers.add("Content-Type", "application/octet-stream");
 				headers.add("Content-Disposition", "attachment;filename=" + "highscores.csv");
 			} else {
-				serviceResponse = new ServiceResponse("Not Available!", 400);
+				serviceResponse = new ServiceResponse(HttpStatus.NOT_AVAILABLE_404.getMessage(), HttpStatus.NOT_AVAILABLE_404);
 				System.out.println(serviceResponse);
 			}
 		} catch (NumberFormatException exception) {
-			serviceResponse.setStatus(400);
-			serviceResponse.setResponse("Wrong number format");
+			serviceResponse.setStatus(HttpStatus.UNPROCESSABLE_ENTITY_422);
+			serviceResponse.setResponse(HttpStatus.UNPROCESSABLE_ENTITY_422.getMessage());
 			System.out.println(serviceResponse.getResponse());
 		} catch (Exception exception) {
-			serviceResponse.setStatus(400);
-			serviceResponse.setResponse("Wrong number format");
+			serviceResponse.setStatus(HttpStatus.UNPROCESSABLE_ENTITY_422);
+			serviceResponse.setResponse(HttpStatus.UNPROCESSABLE_ENTITY_422.getMessage());
 			System.out.println(serviceResponse.getResponse());
 		}
 

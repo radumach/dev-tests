@@ -5,6 +5,7 @@ import static com.scoreServer.server.Constants.SESSION_MAP;
 import static com.scoreServer.server.Constants.SESSION_STORE;
 
 import com.scoreServer.server.Constants;
+import com.scoreServer.server.Constants.HttpStatus;
 import com.scoreServer.server.bean.ServiceResponse;
 import com.scoreServer.server.bean.UserScore;
 import com.scoreServer.server.datastructure.LevelUserScoreHistory;
@@ -27,15 +28,11 @@ public class ScoreServiceImpl implements ScoreService {
 			levelId = Integer.parseUnsignedInt(levelIdString);
 			score = Integer.parseUnsignedInt(scoreString);
 		} catch (NumberFormatException e) {
-			response = new ServiceResponse(e.getMessage(), 500);
-		}
-
-		if (levelId == null) {
-			return new ServiceResponse("Invalid level!", 400);
+			return new ServiceResponse(HttpStatus.UNPROCESSABLE_ENTITY_422.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY_422);
 		}
 
 		if (!validateSession(sessionId)) {
-			return new ServiceResponse("Invalid session! Please call login.", 401);
+			return new ServiceResponse(HttpStatus.BAD_REQUEST_401.getMessage(), HttpStatus.BAD_REQUEST_401);
 		}
 		
 		Constants.GAME_HISTORY_LOCK.writeLock().lock();
