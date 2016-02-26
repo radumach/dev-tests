@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Collection;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -17,7 +18,11 @@ import com.scoreServer.server.bean.ServiceResponse;
 import com.scoreServer.server.bean.UserScore;
 import com.scoreServer.server.testUtils.GameDataMockHelper;
 import com.scoreServer.server.testUtils.ServiceLocatorMockHelper;
+import com.scoreServer.server.testUtils.SessionDataMockHelper;
 import com.scoreServer.service.service.HighscoreFormatterService;
+
+import jdk.nashorn.internal.ir.annotations.Ignore;
+
 
 public class HighscoreServiceImplTest {
 	
@@ -34,6 +39,14 @@ public class HighscoreServiceImplTest {
 		ServiceLocatorMockHelper.clearRegistredInstances();
 		highscoreFormatterServiceMock = ServiceLocatorMockHelper.mockAndRegister(HighscoreFormatterService.class);
 		highscoreService = new HighscoreServiceImpl();
+		SessionDataMockHelper.clearAll();
+		GameDataMockHelper.clearAll();
+	}
+	
+	@After
+	public void cleanUp() {
+		SessionDataMockHelper.clearAll();
+		GameDataMockHelper.clearAll();
 	}
 
 	@Test

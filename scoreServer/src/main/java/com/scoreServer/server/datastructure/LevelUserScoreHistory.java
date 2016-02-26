@@ -13,13 +13,12 @@ import com.scoreServer.server.bean.UserScore;
 
 public class LevelUserScoreHistory {
 
+	//TODO maybe remove scoreHistory ?
 	private final Map<Integer, Integer> scoresHistory;
 	private final List<UserScore> highscores;
 	private Comparator<UserScore> highscoreComparator;
 
 	private int minHighScore = Integer.MIN_VALUE;
-	
-	private static final String CSV_DELIMITER = ",";
 
 	public LevelUserScoreHistory() {
 		scoresHistory = new HashMap<>();

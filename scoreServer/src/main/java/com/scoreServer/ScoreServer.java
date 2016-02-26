@@ -34,8 +34,12 @@ public class ScoreServer {
 		// Add a filter
 		context.getFilters().add(new ParamsFilter());
 
-		// Set an Executor for the multi-threading
-		server.setExecutor(Executors.newCachedThreadPool());
+		// Set an Executor for the multi-threading with daemon threads
+		server.setExecutor(Executors.newCachedThreadPool(runnable -> {
+			Thread t = Executors.defaultThreadFactory().newThread(runnable);
+            t.setDaemon(true);
+            return t;
+		}));
 
 		// Start the server
 		server.start();
@@ -44,12 +48,12 @@ public class ScoreServer {
 		Thread sessionCleanupThread = new SessionCleanupThread();
 		sessionCleanupThread.setDaemon(true);
 		sessionCleanupThread.start();
-		System.out.println("Session cleanup thread is started!");
-		
+		System.out.println("Session cleanup thread is started!");		
 	}
 	
 	public static void stop() {
 		server.stop(0);
+		System.out.println("Server stopped");
 	}
 
 }

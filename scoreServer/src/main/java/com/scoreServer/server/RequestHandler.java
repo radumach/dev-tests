@@ -10,10 +10,13 @@ import com.scoreServer.service.framework.Context;
 import com.scoreServer.service.service.HighscoreService;
 import com.scoreServer.service.service.LoginService;
 import com.scoreServer.service.service.ScoreService;
-import com.sun.net.httpserver.*;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 public class RequestHandler implements HttpHandler {
 
+	//TODO refactor this to separate methods for each operation (possibly placed in another class that is injected and unit teste separately)
 	/*
 	 * Usage: handle a client request
 	 * 
@@ -38,6 +41,9 @@ public class RequestHandler implements HttpHandler {
 				LoginService loginService = Context.get(LoginService.class);
 
 				serviceResponse = loginService.login(userId);
+				
+				Headers headers = exchange.getResponseHeaders();
+				headers.add("Content-Type", "text/plain");
 
 			} else if (params.get("request").equals("score")) {
 
@@ -50,6 +56,9 @@ public class RequestHandler implements HttpHandler {
 
 				serviceResponse = scoreService.addScore((String) params.get("sessionkey"),
 						(String) params.get("levelid"), (String) params.get(Constants.POST_BODY_PARAMETER_NAME));
+				
+				Headers headers = exchange.getResponseHeaders();
+				headers.add("Content-Type", "text/plain");
 
 			} else if (params.get("request").equals("highscorelist")) {
 
@@ -87,8 +96,6 @@ public class RequestHandler implements HttpHandler {
 
 		try {
 			if (serviceResponse != null) {
-				Headers headers = exchange.getResponseHeaders();
-				headers.add("Content-Type", "text/plain");
 				exchange.sendResponseHeaders(serviceResponse.getStatus(), serviceResponse.getResponse().length());
 			} else {
 				exchange.sendResponseHeaders(400, 0);
