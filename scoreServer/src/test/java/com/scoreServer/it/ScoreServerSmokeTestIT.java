@@ -57,9 +57,7 @@ public class ScoreServerSmokeTestIT extends IntegrationTestBase {
 		response = ScoreClient.updateScore(sessionId, "11", "44");
 		response = ScoreClient.getHighscore("11");
 		assertEquals(1, response.getHeaders().get("content-type").size());
-		assertEquals("application/octet-stream", response.getHeaders().get("content-type").get(0));
-		assertEquals(1, response.getHeaders().get("content-disposition").size());
-		assertEquals("attachment;filename=" + "highscores.csv", response.getHeaders().get("content-disposition").get(0));
+		assertEquals("text/plain", response.getHeaders().get("content-type").get(0));
 		assertEquals("1" + Constants.HIGHSCORE_FORMAT_VALUE_SEPARATOR + "44", response.getBody());
 	}
 	

@@ -1,7 +1,6 @@
 package com.scoreServer.service.service;
 
 import java.util.Collection;
-import java.util.Set;
 
 import com.scoreServer.server.bean.UserScore;
 import com.scoreServer.service.framework.annotation.Implementor;

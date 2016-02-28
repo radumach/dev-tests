@@ -21,8 +21,6 @@ import com.scoreServer.server.testUtils.ServiceLocatorMockHelper;
 import com.scoreServer.server.testUtils.SessionDataMockHelper;
 import com.scoreServer.service.service.HighscoreFormatterService;
 
-import jdk.nashorn.internal.ir.annotations.Ignore;
-
 
 public class HighscoreServiceImplTest {
 	

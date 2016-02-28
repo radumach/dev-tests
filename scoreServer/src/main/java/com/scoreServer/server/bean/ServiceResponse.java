@@ -2,11 +2,10 @@ package com.scoreServer.server.bean;
 
 import com.scoreServer.server.Constants.HttpStatus;
 
-//TODO maybe make immutable and refactor as necesasry in other code
 public class ServiceResponse {
 	
-	private String response;
-	private HttpStatus status = HttpStatus.OK_200;
+	private final String response;
+	private final HttpStatus status;
 	
 	public ServiceResponse() {
 		this("", HttpStatus.OK_200);
@@ -25,16 +24,8 @@ public class ServiceResponse {
 		return response;
 	}
 
-	public void setResponse(String response) {
-		this.response = response;
-	}
-
 	public int getStatus() {
 		return status.getCode();
-	}
-
-	public void setStatus(HttpStatus status) {
-		this.status = status;
 	}
 
 	public boolean isError() {

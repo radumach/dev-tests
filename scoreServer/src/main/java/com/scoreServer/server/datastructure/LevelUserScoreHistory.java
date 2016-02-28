@@ -3,9 +3,7 @@ package com.scoreServer.server.datastructure;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import com.scoreServer.server.Constants;
@@ -13,21 +11,17 @@ import com.scoreServer.server.bean.UserScore;
 
 public class LevelUserScoreHistory {
 
-	//TODO maybe remove scoreHistory ?
-	private final Map<Integer, Integer> scoresHistory;
 	private final List<UserScore> highscores;
 	private Comparator<UserScore> highscoreComparator;
 
 	private int minHighScore = Integer.MIN_VALUE;
 
 	public LevelUserScoreHistory() {
-		scoresHistory = new HashMap<>();
 		highscores = new ArrayList<>(Constants.MAX_HIGHSCORE_COUNT);
 		highscoreComparator = (us1, us2) -> us2.getScore() - us1.getScore();
 	}
 
 	public void update(UserScore newUserScore) {
-		scoresHistory.put(newUserScore.getUserId(), newUserScore.getScore());
 		updateHighscores(newUserScore);
 	}
 
